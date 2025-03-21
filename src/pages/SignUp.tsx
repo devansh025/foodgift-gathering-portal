@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { AtSign, Building, Lock, User, MapPin, Phone, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
+import { registerUser } from "@/lib/firebase";
 
 const SignUp = () => {
   const [userType, setUserType] = useState("restaurant");
@@ -68,9 +68,24 @@ const SignUp = () => {
     
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const { user, error } = await registerUser(formData.email, formData.password);
+      
+      if (error) {
+        toast({
+          title: "Registration failed",
+          description: error,
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      // Store additional user data (you might want to save this to Firestore in a real app)
+      localStorage.setItem("userType", userType);
+      localStorage.setItem("userName", formData.name);
+      localStorage.setItem("userAddress", formData.address);
+      localStorage.setItem("userPhone", formData.phone);
       
       toast({
         title: "Account created!",
@@ -79,7 +94,14 @@ const SignUp = () => {
       
       // Redirect to login
       navigate("/login");
-    }, 1500);
+    } catch (error) {
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+    }
   };
   
   return (

@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { AtSign, Lock, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
+import { loginUser } from "@/lib/firebase";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -33,14 +34,26 @@ const Login = () => {
     
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const { user, error } = await loginUser(email, password);
+      
+      if (error) {
+        toast({
+          title: "Login failed",
+          description: error,
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
       
       toast({
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
+      
+      // Store user type in localStorage
+      localStorage.setItem("userType", userType);
       
       // Redirect based on user type
       if (userType === "restaurant") {
@@ -48,7 +61,14 @@ const Login = () => {
       } else {
         navigate("/ngo/dashboard");
       }
-    }, 1500);
+    } catch (error) {
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+    }
   };
   
   return (
