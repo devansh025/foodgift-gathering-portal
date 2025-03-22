@@ -69,7 +69,7 @@
 // app.listen(PORT, () => console.log(`🔥 Server running on port ${PORT}`));
 
 
-// Use `import` instead of `require`
+
 import express from "express";
 import admin from "firebase-admin";
 import cors from "cors";
@@ -81,7 +81,7 @@ dotenv.config();
 
 // Read Firebase service account key (since `require()` isn't available)
 const serviceAccount = JSON.parse(
-  readFileSync("./serviceAccountKey.json", "utf8")
+  readFileSync("./foodconnect-fcdd2-firebase-adminsdk-fbsvc-c943b9e2e1.json", "utf8")
 );
 
 // Initialize Firebase Admin SDK
