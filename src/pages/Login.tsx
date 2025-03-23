@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { AtSign, Lock, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
-import { loginUser } from "@/lib/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -19,10 +19,10 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !password) {
       toast({
         title: "Error",
@@ -31,31 +31,15 @@ const Login = () => {
       });
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     try {
-      const { user, error } = await loginUser(email, password);
-      
-      if (error) {
-        toast({
-          title: "Login failed",
-          description: error,
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-      
+      await signInWithEmailAndPassword(auth, email, password);
       toast({
-        title: "Welcome back!",
+        title: "Success",
         description: "You have successfully logged in.",
       });
-      
-      // Store user type in localStorage
-      localStorage.setItem("userType", userType);
-      
-      // Redirect based on user type
       if (userType === "restaurant") {
         navigate("/restaurant/dashboard");
       } else {
@@ -63,27 +47,22 @@ const Login = () => {
       }
     } catch (error) {
       toast({
-        title: "Something went wrong",
-        description: "Please try again later.",
+        title: "Login Failed",
+        description: error.message,
         variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="max-w-md mx-auto px-6 md:px-10 py-20">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
         <Card className="border-gray-200 dark:border-gray-800 shadow-lg">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-            <CardDescription>
-              Sign in to your account to continue
-            </CardDescription>
+            <CardDescription>Sign in to your account to continue</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="restaurant" onValueChange={setUserType} className="w-full mb-6">
@@ -92,7 +71,7 @@ const Login = () => {
                 <TabsTrigger value="ngo">NGO</TabsTrigger>
               </TabsList>
             </Tabs>
-            
+
             <form onSubmit={handleSubmit}>
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -110,14 +89,11 @@ const Login = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password">Password</Label>
-                    <Link
-                      to="/forgot-password"
-                      className="text-sm text-connect-green-600 hover:text-connect-green-700"
-                    >
+                    <Link to="/forgot-password" className="text-sm text-connect-green-600 hover:text-connect-green-700">
                       Forgot password?
                     </Link>
                   </div>
@@ -131,21 +107,13 @@ const Login = () => {
                       className="pl-9 pr-10"
                       required
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
-                    >
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-muted-foreground hover:text-foreground">
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
                 </div>
-                
-                <Button 
-                  type="submit" 
-                  className="w-full bg-connect-green-500 hover:bg-connect-green-600" 
-                  disabled={isLoading}
-                >
+
+                <Button type="submit" className="w-full bg-connect-green-500 hover:bg-connect-green-600" disabled={isLoading}>
                   {isLoading ? "Signing in..." : "Sign In"}
                 </Button>
               </div>
@@ -153,10 +121,7 @@ const Login = () => {
           </CardContent>
           <CardFooter className="justify-center border-t border-gray-100 dark:border-gray-800 px-6 py-4">
             <p className="text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link to="/signup" className="font-medium text-connect-green-600 hover:text-connect-green-700">
-                Sign up
-              </Link>
+              Don't have an account? <Link to="/signup" className="font-medium text-connect-green-600 hover:text-connect-green-700">Sign up</Link>
             </p>
           </CardFooter>
         </Card>
