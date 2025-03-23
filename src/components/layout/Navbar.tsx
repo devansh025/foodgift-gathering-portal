@@ -3,12 +3,14 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { UtensilsCrossed, Heart, Menu, X } from "lucide-react";
+import { UtensilsCrossed, Heart, Menu, X, User } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -73,12 +75,32 @@ const Navbar = () => {
         </div>
         
         <div className="hidden md:flex items-center space-x-4">
-          <Button asChild variant="outline" size="sm" className="h-9 text-sm">
-            <Link to="/login">Log In</Link>
-          </Button>
-          <Button asChild size="sm" className="h-9 text-sm bg-connect-green-500 hover:bg-connect-green-600">
-            <Link to="/signup">Sign Up</Link>
-          </Button>
+          {currentUser ? (
+            <>
+              {/* User is logged in */}
+              <Button 
+                asChild 
+                variant="outline" 
+                size="sm" 
+                className="h-9 text-sm flex items-center gap-2"
+              >
+                <Link to={localStorage.getItem("userType") === "restaurant" ? "/restaurant/dashboard" : "/ngo/dashboard"}>
+                  <User size={14} />
+                  Dashboard
+                </Link>
+              </Button>
+            </>
+          ) : (
+            <>
+              {/* User is not logged in */}
+              <Button asChild variant="outline" size="sm" className="h-9 text-sm">
+                <Link to="/login">Log In</Link>
+              </Button>
+              <Button asChild size="sm" className="h-9 text-sm bg-connect-green-500 hover:bg-connect-green-600">
+                <Link to="/signup">Sign Up</Link>
+              </Button>
+            </>
+          )}
         </div>
         
         {/* Mobile Menu Button */}
@@ -115,12 +137,31 @@ const Navbar = () => {
           ))}
           
           <div className="pt-6 flex flex-col space-y-4">
-            <Button asChild variant="outline" className="w-full justify-center">
-              <Link to="/login">Log In</Link>
-            </Button>
-            <Button asChild className="w-full justify-center bg-connect-green-500 hover:bg-connect-green-600">
-              <Link to="/signup">Sign Up</Link>
-            </Button>
+            {currentUser ? (
+              <>
+                {/* User is logged in - Mobile */}
+                <Button 
+                  asChild 
+                  variant="outline" 
+                  className="w-full justify-center flex items-center gap-2"
+                >
+                  <Link to={localStorage.getItem("userType") === "restaurant" ? "/restaurant/dashboard" : "/ngo/dashboard"}>
+                    <User size={16} />
+                    Dashboard
+                  </Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                {/* User is not logged in - Mobile */}
+                <Button asChild variant="outline" className="w-full justify-center">
+                  <Link to="/login">Log In</Link>
+                </Button>
+                <Button asChild className="w-full justify-center bg-connect-green-500 hover:bg-connect-green-600">
+                  <Link to="/signup">Sign Up</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
